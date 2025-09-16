@@ -1,0 +1,60 @@
+name: Ory Config – Plan
+
+on:
+  pull_request:
+    paths: ["iac/ory/**.yaml"]
+
+env:
+  ORY_WORKSPACE_ID: ${{ secrets.ORY_WORKSPACE_ID }}
+  ORY_PROJECT_ID:   ${{ secrets.ORY_PROJECT_ID }}
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    container: { image: oryd/ory:v1 }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Export live config (YAML)
+        run: |
+          ory get identity-config   --workspace "$ORY_WORKSPACE_ID" --project "$ORY_PROJECT_ID" --format yaml > live.identity.yaml
+          ory get oauth2-config     --workspace "$ORY_WORKSPACE_ID" --project "$ORY_PROJECT_ID" --format yaml > live.oauth2.yaml
+          ory get permission-config --workspace "$ORY_WORKSPACE_ID" --project "$ORY_PROJECT_ID" --format yaml > live.permissions.yaml || true
+
+      - name: Install dyff & yq
+        run: |
+          apk add --no-cache curl
+          curl -sSL https://github.com/homeport/dyff/releases/download/v1.7.0/dyff_1.7.0_linux_amd64.tar.gz | tar -xz && mv dyff /usr/local/bin/
+          curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq
+
+      - name: Normalize YAML (optional)
+        run: |
+          for f in iac/ory/*.yaml live.*.yaml; do
+            [ -f "$f" ] || continue
+            yq -P "$f" > "$f.norm" && mv "$f.norm" "$f"
+          done
+
+      - name: Show plan (semantic YAML diff)
+        run: |
+          echo "::group::Identity"
+          dyff between live.identity.yaml iac/ory/identity.yaml || true
+          echo "::endgroup::"
+          echo "::group::OAuth2"
+          dyff between live.oauth2.yaml   iac/ory/oauth2.yaml   || true
+          echo "::endgroup::"
+          echo "::group::Permissions"
+          if [ -f iac/ory/permissions.yaml ] && [ -f live.permissions.yaml ]; then
+            dyff between live.permissions.yaml iac/ory/permissions.yaml || true
+          else
+            echo "Permissions: no desired or live config to diff."
+          fi
+          echo "::endgroup::"
+
+      - name: Upload plan artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ory-plan
+          path: |
+            live.identity.yaml
+            live.oauth2.yaml
+            live.permissions.yaml

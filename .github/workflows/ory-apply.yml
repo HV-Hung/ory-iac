@@ -1,0 +1,57 @@
+name: Ory Config – Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type APPLY to confirm"
+        required: true
+        default: "APPLY"
+
+env:
+  ORY_WORKSPACE_ID: ${{ secrets.ORY_WORKSPACE_ID }}
+  ORY_PROJECT_ID:   ${{ secrets.ORY_PROJECT_ID }}
+  # Sensitive value injected at runtime (e.g., SMTP URI). Keep name generic.
+  ORY_SECRET_1:     ${{ secrets.ORY_SECRET_1 }}
+
+jobs:
+  apply:
+    if: inputs.confirm == 'APPLY'
+    runs-on: ubuntu-latest
+    container: { image: oryd/ory:v1 }
+    # environment: production   # <-- uncomment if you want env approvals
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yq
+        run: |
+          apk add --no-cache curl
+          curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq
+          chmod +x /usr/local/bin/yq
+
+      - name: Render identity config with secret (temp file)
+        run: |
+          # Inject sensitive key into a temp file; do NOT overwrite tracked file.
+          yq -y '.courier.smtp.connection_uri = env(ORY_SECRET_1)' \
+             iac/ory/identity.yaml > iac/ory/.identity.rendered.yaml
+
+      - name: Apply
+        run: |
+          ory update identity-config   --workspace "$ORY_WORKSPACE_ID" --project "$ORY_PROJECT_ID" --file iac/ory/.identity.rendered.yaml
+          ory update oauth2-config     --workspace "$ORY_WORKSPACE_ID" --project "$ORY_PROJECT_ID" --file iac/ory/oauth2.yaml
+          if [ -f iac/ory/permissions.yaml ]; then
+            ory update permission-config --workspace "$ORY_WORKSPACE_ID" --project "$ORY_PROJECT_ID" --file iac/ory/permissions.yaml
+          fi
+
+      - name: Post-apply check (optional drift)
+        run: |
+          ory get identity-config --workspace "$ORY_WORKSPACE_ID" --project "$ORY_PROJECT_ID" --format yaml > post.identity.yaml
+          ory get oauth2-config   --workspace "$ORY_WORKSPACE_ID" --project "$ORY_PROJECT_ID" --format yaml > post.oauth2.yaml
+          echo "::group::Drift – Identity"
+          diff -u <(yq -o=json iac/ory/identity.yaml | jq -S . | sed 's/placeholder//') \
+                  <(yq -o=json post.identity.yaml     | jq -S .) || true
+          echo "::endgroup::"
+          echo "::group::Drift – OAuth2"
+          diff -u <(yq -o=json iac/ory/oauth2.yaml | jq -S .) \
+                  <(yq -o=json post.oauth2.yaml     | jq -S .) || true
+          echo "::endgroup::"
