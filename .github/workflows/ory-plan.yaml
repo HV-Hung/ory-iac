@@ -22,54 +22,42 @@ jobs:
         working-directory: dev
     steps:
       - uses: actions/checkout@v4
-
-      - name: Export live config (YAML)
+      - name: Fetch current Ory config
         run: |
           ory use project "$ORY_PROJECT_ID"
           ory get identity-config   --format yaml > live.identity.yaml
           ory get oauth2-config     --format yaml > live.oauth2.yaml
-          ory get permission-config --format yaml > live.permissions.yaml || true
 
-      - name: Install dyff & yq
+      - name: Setup YAML tooling
         run: |
           apk add --no-cache curl
-          curl -sSL https://github.com/homeport/dyff/releases/download/v1.7.0/dyff_1.7.0_linux_amd64.tar.gz | tar -xz && mv dyff /usr/local/bin/
-          curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq
+          curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
+            -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq
 
-      # ⬇️ Inject the secret into the desired file BEFORE comparing
-      - name: Inject secret into identity.yaml (CI-only)
+      - name: Render config with secrets
         run: |
-          # Updates the single path from env without printing the secret in logs
-          yq -i '.courier.smtp.connection_uri = env(SMTP_CONNECTION_URI)' identity.yaml
+          cp identity.yaml identity.rendered.yaml
+          yq -i '.courier.smtp.connection_uri = env(SMTP_CONNECTION_URI)' identity.rendered.yaml
 
-      - name: Normalize YAML (optional)
+      - name: Format configs for comparison
         run: |
-          for f in *.yaml live.*.yaml; do
-            [ -f "$f" ] || continue
-            yq -P "$f" > "$f.norm" && mv "$f.norm" "$f"
-          done
+          # Pretty-print with stable key order for clean diffs
+          yq -P 'sort_keys(..)' live.identity.yaml      > live.identity.norm.yaml
+          yq -P 'sort_keys(..)' identity.rendered.yaml  > desired.identity.norm.yaml
+          yq -P 'sort_keys(..)' live.oauth2.yaml        > live.oauth2.norm.yaml
+          yq -P 'sort_keys(..)' oauth2.yaml             > desired.oauth2.norm.yaml
+          # Replace originals for the diff step below
+          mv live.identity.norm.yaml     live.identity.yaml
+          mv desired.identity.norm.yaml  identity.rendered.yaml
+          mv live.oauth2.norm.yaml       live.oauth2.yaml
+          mv desired.oauth2.norm.yaml    oauth2.yaml
 
-      - name: Show plan (semantic YAML diff)
+      - name: Show planned changes
         run: |
-          echo "::group::Identity"
-          dyff between live.identity.yaml identity.yaml || true
-          echo "::endgroup::"
-          echo "::group::OAuth2"
-          dyff between live.oauth2.yaml   oauth2.yaml   || true
-          echo "::endgroup::"
-          echo "::group::Permissions"
-          if [ -f permissions.yaml ] && [ -f live.permissions.yaml ]; then
-            dyff between live.permissions.yaml permissions.yaml || true
-          else
-            echo "Permissions: no desired or live config to diff."
-          fi
-          echo "::endgroup::"
-
-      - name: Upload plan artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ory-plan
-          path: |
-            live.identity.yaml
-            live.oauth2.yaml
-            live.permissions.yaml
+          echo "===== Identity config diff ====="
+          git diff --no-index --color=always -u \
+            live.identity.yaml identity.rendered.yaml || true
+          echo
+          echo "===== OAuth2 config diff ====="
+          git diff --no-index --color=always -u \
+            live.oauth2.yaml oauth2.yaml || true
