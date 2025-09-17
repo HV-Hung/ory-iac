@@ -11,7 +11,7 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      environments: ${{ steps.filter.outputs.changes }}
+      envs: ${{ steps.filter.outputs.changes }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -26,6 +26,7 @@ jobs:
     name: Plan
     needs: filter
     uses: ./.github/workflows/ory-plan.yml
+    if: needs.changes.outputs.environments != '[]'
     strategy:
       matrix:
         environment: ${{ fromJSON(needs.filter.outputs.environments) }}
