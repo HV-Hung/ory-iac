@@ -20,6 +20,7 @@ jobs:
 
       - name: Export live config (YAML)
         run: |
+          ory use project $ORY_PROJECT_ID
           ory get identity-config --format yaml > live.identity.yaml
           ory get oauth2-config --format yaml > live.oauth2.yaml
           ory get permission-config --format yaml > live.permissions.yaml || true
