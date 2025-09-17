@@ -112,7 +112,7 @@ strategies:
   scope: wildcard
 ttl:
   access_token: 1h0m0s
-  auth_code: 30m0s
+  auth_code: 31m0s
   id_token: 1h0m0s
   login_consent_request: 30m0s
   refresh_token: 720h0m0s
