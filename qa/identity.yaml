@@ -30,7 +30,7 @@ cookies:
 courier:
   smtp:
     #Placeholder value for connection_uri, updated in workflow
-    connection_uri: smtps://user:pass@smtp.example.com:465/
+    connection_uri: smtps://user:hung@smtp.example.com:465/
     from_name: Văn Hùng's Project via Ory
   templates:
     login_code:
