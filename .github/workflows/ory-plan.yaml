@@ -20,9 +20,9 @@ jobs:
 
       - name: Export live config (YAML)
         run: |
-          ory get identity-config   --workspace "$ORY_WORKSPACE_ID" --project "$ORY_PROJECT_ID" --format yaml > live.identity.yaml
-          ory get oauth2-config     --workspace "$ORY_WORKSPACE_ID" --project "$ORY_PROJECT_ID" --format yaml > live.oauth2.yaml
-          ory get permission-config --workspace "$ORY_WORKSPACE_ID" --project "$ORY_PROJECT_ID" --format yaml > live.permissions.yaml || true
+          ory get identity-config --format yaml > live.identity.yaml
+          ory get oauth2-config --format yaml > live.oauth2.yaml
+          ory get permission-config --format yaml > live.permissions.yaml || true
 
       - name: Install dyff & yq
         run: |
