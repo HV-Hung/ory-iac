@@ -31,8 +31,8 @@ jobs:
       - name: Setup YAML tooling
         run: |
           apk add --no-cache curl
-          curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
-            -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq
+          curl -sSL https://github.com/homeport/dyff/releases/download/v1.7.0/dyff_1.7.0_linux_amd64.tar.gz | tar -xz && mv dyff /usr/local/bin/
+          curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq
 
       - name: Render config with secrets
         run: |
@@ -55,9 +55,7 @@ jobs:
       - name: Show planned changes
         run: |
           echo "===== Identity config diff ====="
-          git diff --no-index --color=always -u \
-            live.identity.yaml identity.rendered.yaml || true
+          dyff between live.identity.yaml identity.rendered.yaml || true
           echo
           echo "===== OAuth2 config diff ====="
-          git diff --no-index --color=always -u \
-            live.oauth2.yaml oauth2.yaml || true
+          dyff between live.oauth2.yaml oauth2.yaml || true
