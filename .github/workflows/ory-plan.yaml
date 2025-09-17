@@ -15,6 +15,9 @@ jobs:
       ORY_PROJECT_ID: "fae0f954-aa75-490a-afb8-19d573b76a83"
       ORY_WORKSPACE_ID: "32e5b9ac-d811-47ea-8c72-b33e19187b39"
       ORY_WORKSPACE_API_KEY: ${{ secrets.ORY_WORKSPACE_API_KEY }}
+    defaults:
+      run:
+        working-directory: dev
     steps:
       - uses: actions/checkout@v4
 
