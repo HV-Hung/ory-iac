@@ -1,0 +1,10 @@
+name: Ory Config – Plan
+
+on:
+  push:
+
+jobs:
+  plan:
+    uses: ./.github/workflows/ory-plan.yml
+    with: 
+      environment: dev
