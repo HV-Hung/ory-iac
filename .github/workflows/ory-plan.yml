@@ -12,7 +12,10 @@ on:
 jobs:
   plan:
     runs-on: ubuntu-latest
-    environment: dev
+    container:
+      image: oryd/ory:v1
+      options: --user root # Required so checkout can write to the mounted workspace (default non-root user has no perms)
+    environment: ${{ inputs.environment }}
     env:
       ORY_PROJECT_ID: ${{ vars.ORY_PROJECT_ID }} #"fae0f954-aa75-490a-afb8-19d573b76a83"
       ORY_WORKSPACE_ID: ${{ vars.ORY_WORKSPACE_ID }} #"32e5b9ac-d811-47ea-8c72-b33e19187b39"
@@ -21,18 +24,11 @@ jobs:
       SMTP_CONNECTION_URI: ${{ secrets.SMTP_CONNECTION_URI }}
     defaults:
       run:
-        working-directory: dev
+        working-directory: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install Ory CLI
-        run: |
-          bash <(curl https://raw.githubusercontent.com/ory/meta/master/install.sh) -d -b . ory v1.1.0
-          sudo mv ./ory /usr/local/bin/
-
       - name: Fetch current Ory config
         run: |
-          ory auth
           ory use project "$ORY_PROJECT_ID"
           ory get identity-config   --format yaml > live.identity.yaml
           ory get oauth2-config     --format yaml > live.oauth2.yaml
