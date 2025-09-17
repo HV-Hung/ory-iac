@@ -1,4 +1,4 @@
-name: Ory Config – Plan
+name: Ory Config - Plan
 
 on:
   workflow_call:
@@ -7,8 +7,19 @@ on:
         description: 'The name of the GitHub environment to use as context for this workflow'
         required: true
         type: string
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'The name of the GitHub environment to use as context for this workflow'
+        required: true
+        type: string
 
-
+env:
+  ORY_PROJECT_ID: ${{ vars.ORY_PROJECT_ID }}
+  ORY_WORKSPACE_ID: ${{ vars.ORY_WORKSPACE_ID }}
+  ORY_WORKSPACE_API_KEY: ${{ secrets.ORY_WORKSPACE_API_KEY }}
+  # expose SMTP to the shell; yq will read it via env()
+  SMTP_CONNECTION_URI: ${{ secrets.SMTP_CONNECTION_URI }}
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -16,12 +27,6 @@ jobs:
       image: oryd/ory:v1
       options: --user root # Required so checkout can write to the mounted workspace (default non-root user has no perms)
     environment: ${{ inputs.environment }}
-    env:
-      ORY_PROJECT_ID: ${{ vars.ORY_PROJECT_ID }} #"fae0f954-aa75-490a-afb8-19d573b76a83"
-      ORY_WORKSPACE_ID: ${{ vars.ORY_WORKSPACE_ID }} #"32e5b9ac-d811-47ea-8c72-b33e19187b39"
-      ORY_WORKSPACE_API_KEY: ${{ secrets.ORY_WORKSPACE_API_KEY }}
-      # expose SMTP to the shell; yq will read it via env()
-      SMTP_CONNECTION_URI: ${{ secrets.SMTP_CONNECTION_URI }}
     defaults:
       run:
         working-directory: ${{ inputs.environment }}

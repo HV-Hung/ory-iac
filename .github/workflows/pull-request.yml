@@ -2,10 +2,35 @@ name: Ory Config – Plan
 
 on:
   push:
+  
 
 jobs:
+  filter:
+    needs: style
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      environments: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            dev:
+              - 'dev/**'
+            qa:
+              - 'qa/**'
   plan:
+    name: Plan
+    needs: filter
     uses: ./.github/workflows/ory-plan.yml
+    strategy:
+      matrix:
+        environment: ${{ fromJSON(needs.filter.outputs.environments) }}
+      fail-fast: false
     with: 
-      environment: dev
+      environment: ${{ matrix.environment }}
     secrets: inherit
