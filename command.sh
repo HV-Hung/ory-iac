@@ -1,0 +1,1 @@
+ory update identity-config -f identity.yaml
