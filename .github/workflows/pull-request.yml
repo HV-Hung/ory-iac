@@ -11,7 +11,7 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      envs: ${{ steps.filter.outputs.filter }}
+      environments: ${{ steps.filter.outputs.filter }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
