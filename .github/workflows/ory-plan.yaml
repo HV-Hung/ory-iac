@@ -7,11 +7,10 @@ on:
 jobs:
   plan:
     runs-on: ubuntu-latest
-    container: oryd/ory:v1
+    container:
+      image: oryd/ory:v1
+      options: --user root
     environment: dev
-    defaults:
-      run:
-        working-directory: dev
     env:
       ORY_PROJECT_ID: "fae0f954-aa75-490a-afb8-19d573b76a83"
       ORY_WORKSPACE_ID: "32e5b9ac-d811-47ea-8c72-b33e19187b39"
