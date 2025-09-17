@@ -55,7 +55,7 @@ jobs:
       - name: Show planned changes
         run: |
           echo "===== Identity config diff ====="
-          dyff between live.identity.yaml identity.rendered.yaml || true
+          dyff between --color on live.identity.yaml identity.rendered.yaml || true
           echo
           echo "===== OAuth2 config diff ====="
-          dyff between live.oauth2.yaml oauth2.yaml || true
+          dyff between --color on live.oauth2.yaml oauth2.yaml || true
