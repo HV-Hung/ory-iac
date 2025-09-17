@@ -26,7 +26,7 @@ jobs:
     name: Plan
     needs: filter
     uses: ./.github/workflows/ory-plan.yml
-    if: needs.changes.outputs.environments != '[]'
+    if: needs.filter.outputs.environments != '[]'
     strategy:
       matrix:
         environment: ${{ fromJSON(needs.filter.outputs.environments) }}
