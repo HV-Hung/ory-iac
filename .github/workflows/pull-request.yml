@@ -6,7 +6,6 @@ on:
 
 jobs:
   filter:
-    needs: style
     runs-on: ubuntu-22.04
     permissions:
       contents: read
