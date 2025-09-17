@@ -32,6 +32,7 @@ jobs:
 
       - name: Fetch current Ory config
         run: |
+          ory auth
           ory use project "$ORY_PROJECT_ID"
           ory get identity-config   --format yaml > live.identity.yaml
           ory get oauth2-config     --format yaml > live.oauth2.yaml
