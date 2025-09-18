@@ -1,7 +1,9 @@
-name: Ory Config – Plan
+name: Ory Config - Apply Main
 
 on:
-  pull_request:
+  push:
+    branches: 
+      - main
 jobs:
   filter:
     runs-on: ubuntu-22.04
@@ -24,6 +26,19 @@ jobs:
     name: Plan
     needs: filter
     uses: ./.github/workflows/ory-plan.yml
+    if: needs.filter.outputs.environments != '[]'
+    strategy:
+      matrix:
+        environment: ${{ fromJSON(needs.filter.outputs.environments) }}
+      fail-fast: false
+    with: 
+      environment: ${{ matrix.environment }}
+    secrets: inherit
+
+  apply:
+    name: Aplly
+    needs: plan
+    uses: ./.github/workflows/ory-apply.yml
     if: needs.filter.outputs.environments != '[]'
     strategy:
       matrix:

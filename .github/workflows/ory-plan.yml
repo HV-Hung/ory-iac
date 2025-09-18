@@ -1,4 +1,4 @@
-name: Ory Config - Plan
+name: Ory Plan
 
 on:
   workflow_call:
