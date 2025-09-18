@@ -39,7 +39,6 @@ jobs:
 
       - name: Apply
         run: |
-          ory use project "$ORY_PROJECT_ID"
           ory update identity-config --format yaml --file identity.rendered.yaml
           ory update oauth2-config   --format yaml --file oauth2.yaml
           

@@ -34,7 +34,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Fetch current Ory config
         run: |
-          ory use project "$ORY_PROJECT_ID"
           ory get identity-config   --format yaml > live.identity.yaml
           ory get oauth2-config     --format yaml > live.oauth2.yaml
 
