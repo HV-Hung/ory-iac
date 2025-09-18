@@ -37,7 +37,7 @@ jobs:
 
   apply:
     name: Aplly
-    needs: plan
+    needs: [ plan, filter]
     uses: ./.github/workflows/ory-apply.yml
     if: needs.filter.outputs.environments != '[]'
     strategy:

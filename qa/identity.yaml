@@ -227,7 +227,7 @@ selfservice:
       enabled: false
     code:
       config:
-        lifespan: 16m0s
+        lifespan: 17m0s
         max_submissions: 5
         missing_credential_fallback_enabled: true
       enabled: true
