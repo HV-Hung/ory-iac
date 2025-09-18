@@ -15,7 +15,8 @@ env:
   # expose SMTP to the shell; yq will read it via env()
   SMTP_CONNECTION_URI: ${{ secrets.SMTP_CONNECTION_URI }}
 jobs:
-  plan:
+  apply:
+    name: Apply
     runs-on: ubuntu-latest
     container:
       image: oryd/ory:v1
@@ -39,6 +40,6 @@ jobs:
       - name: Apply
         run: |
           ory use project "$ORY_PROJECT_ID"
-          ory update identity-config --file identity.rendered.yaml
-          ory update oauth2-config   --file oauth2.yaml
+          ory update identity-config --format yaml --file identity.rendered.yaml
+          ory update oauth2-config   --format yaml --file oauth2.yaml
           
