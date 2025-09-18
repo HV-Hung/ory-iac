@@ -11,7 +11,7 @@ on:
 env:
   ORY_PROJECT_ID: ${{ vars.ORY_PROJECT_ID }}
   ORY_WORKSPACE_ID: ${{ vars.ORY_WORKSPACE_ID }}
-  ORY_WORKSPACE_API_KEY: ${{ secrets.ORY_WORKSPACE_API_KEY }}
+  ORY_PROJECT_API_KEY: ${{ secrets.ORY_PROJECT_API_KEY }}
   # expose SMTP to the shell; yq will read it via env()
   SMTP_CONNECTION_URI: ${{ secrets.SMTP_CONNECTION_URI }}
 jobs:
@@ -39,7 +39,6 @@ jobs:
 
       - name: Apply
         run: |
-          ory use project "$ORY_PROJECT_ID"
           ory update identity-config --format yaml --file identity.rendered.yaml
           ory update oauth2-config   --format yaml --file oauth2.yaml
           
