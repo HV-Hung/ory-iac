@@ -298,7 +298,7 @@ session:
     path: /
     persistent: false
     same_site: Lax
-  lifespan: 74h0m0s
+  lifespan: 75h0m0s
   whoami:
     required_aal: highest_available
     tokenizer:
