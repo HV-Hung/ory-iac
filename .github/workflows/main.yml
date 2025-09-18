@@ -5,6 +5,26 @@ on:
     branches: 
       - main
 jobs:
+  tag:
+    name: Tag Release
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: wemogy/get-release-version-action@v4.3.2
+        with:
+          prefix: 'v'
+          only-bump-suffix: true
+          create-tag: 'true'
+          git-username: 'hung'
+          git-email: 'hung@git.com'
+          mode: 'semantic'
+          
   filter:
     runs-on: ubuntu-22.04
     permissions:
