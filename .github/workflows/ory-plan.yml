@@ -62,10 +62,38 @@ jobs:
           mv live.oauth2.norm.yaml       live.oauth2.yaml
           mv desired.oauth2.norm.yaml    oauth2.yaml
 
-      - name: Show planned changes
+      - name: Plan
         run: |
           echo "===== Identity config diff ====="
           dyff between --color on live.identity.yaml identity.rendered.yaml || true
           echo
           echo "===== OAuth2 config diff ====="
           dyff between --color on live.oauth2.yaml oauth2.yaml || true
+
+      - name: Build Markdown plan (for PR comment)
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "<details>" > plan.txt
+          echo "<summary>Ory Plan – ${{ inputs.environment }}</summary>" >> plan.txt
+          echo "" >> plan.txt
+          echo "### Identity config diff" >> plan.txt
+          echo "" >> plan.txt
+          echo "\`\`\`" >> plan.txt
+          dyff between --color off live.identity.yaml identity.rendered.yaml >> plan.txt
+          echo "\`\`\`" >> plan.txt
+          echo "" >> plan.txt
+          echo "### OAuth2 config diff"  >> plan.txt
+          echo "" >> plan.txt
+          echo "\`\`\`" >> plan.txt
+          dyff between --color off live.oauth2.yaml oauth2.yaml >> plan.txt
+          echo "\`\`\`" >> plan.txt
+          echo "" >> plan.txt
+          echo "</details>" >> plan.txt
+            
+      - name: Comment PR with plan (markdown)
+        if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          file-path: plan.txt
+          # Use a per-env tag so repeated runs update the same comment
+          comment-tag: ${{ inputs.environment }}-plan

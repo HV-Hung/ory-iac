@@ -32,3 +32,6 @@ jobs:
     with: 
       environment: ${{ matrix.environment }}
     secrets: inherit
+    permissions:
+      contents: read
+      pull-requests: write
