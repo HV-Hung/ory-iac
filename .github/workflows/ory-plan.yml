@@ -42,7 +42,7 @@ jobs:
         run: |
           apk add --no-cache curl
           curl -sSL https://github.com/homeport/dyff/releases/download/v1.7.0/dyff_1.7.0_linux_amd64.tar.gz | tar -xz && mv dyff /usr/local/bin/
-          curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq
+          curl -sSL https://github.com/mikefarah/yq/releases/download/v4.47.2/yq_linux_amd64 -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq
 
       - name: Render config with secrets
         run: |

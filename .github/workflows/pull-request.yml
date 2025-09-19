@@ -2,6 +2,8 @@ name: Ory Config – Plan
 
 on:
   pull_request:
+    branches: 
+      - main
 jobs:
   filter:
     runs-on: ubuntu-22.04
