@@ -237,7 +237,7 @@ selfservice:
     link:
       config:
         base_url: ""
-        lifespan: 15m0s
+        lifespan: 16m0s
       enabled: true
     lookup_secret:
       enabled: false
