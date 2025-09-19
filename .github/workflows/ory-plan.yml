@@ -90,10 +90,9 @@ jobs:
           echo "" >> plan.txt
           echo "</details>" >> plan.txt
             
-      - name: Comment PR with plan (markdown)
+      - name: Comment PR with plan
         if: github.event_name == 'pull_request'
         uses: thollander/actions-comment-pull-request@v3
         with:
-          file-path: plan.txt
-          # Use a per-env tag so repeated runs update the same comment
+          file-path:  ${{ inputs.environment }}/plan.txt
           comment-tag: ${{ inputs.environment }}-plan
